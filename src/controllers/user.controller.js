@@ -1,7 +1,7 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { User } from '../models/user.model.js';
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
+import { uploadOnCloudinary , deleteFromCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import jwt from 'jsonwebtoken';
 
@@ -295,6 +295,17 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Failed to upload avatar");
     }
 
+
+    // Find the user to get the old avatar URL
+    const oldUserAvatar = await User.findById(req.user?._id);
+
+    if (!oldUserAvatar) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const oldAvatarUrl = oldUserAvatar.avatar;
+
+
     const user = await User.findByIdAndUpdate(req.user?._id, {
         $set:{
             avatar: avatar.url
@@ -302,6 +313,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }, {
         new: true
     }).select("-password");
+
+
+      // Delete the old avatar from Cloudinary (if it exists)
+      if (oldAvatarUrl) {
+        const publicId = oldAvatarUrl.split("/").pop().split(".")[0]; // Extract public ID from URL
+        await deleteFromCloudinary(publicId);
+    }
 
     return res
     .status(200)
@@ -328,6 +346,15 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Failed to upload cover image");
     }
 
+    // Find the user to get the old cover image URL
+    const oldUserCoverImage = await User.findById(req.user?._id);
+
+     if (!oldUserCoverImage) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const oldCoverImageUrl = oldUserCoverImage.coverImage;
+
     const user = await User.findByIdAndUpdate(req.user?._id, {
         $set:{
             coverImage: coverImage.url
@@ -335,6 +362,12 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     }, {
         new: true
     }).select("-password");
+
+    // Delete the old cover image from Cloudinary (if it exists)
+    if (oldCoverImageUrl) {
+        const publicId = oldCoverImageUrl.split("/").pop().split(".")[0]; // Extract public ID from URL
+        await deleteFromCloudinary(publicId);
+    }
 
     return res
     .status(200)
@@ -347,6 +380,4 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     );
 
 });
-
-
 export { registerUser, loginUser , logoutUser , refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage };
