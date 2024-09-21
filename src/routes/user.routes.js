@@ -1,12 +1,8 @@
 import { Router } from 'express';
 import { registerUser } from '../controllers/user.controller.js';
 import {upload} from '../middlewares/malter.middlewares.js';
-import { loginUser } from '../controllers/user.controller.js';
-import { logoutUser } from '../controllers/user.controller.js';
+import { loginUser ,logoutUser , refreshAccessToken , changeCurrentPassword , getCurrentUser , updateAccountDetails , updateUserAvatar , updateUserCoverImage , getUserChannelProfile} from '../controllers/user.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
-import { refreshAccessToken } from '../controllers/user.controller.js';
-import { changeCurrentPassword } from '../controllers/user.controller.js';
-
 
 const router = Router();
 
@@ -31,4 +27,11 @@ router.route('/logout').post(verifyJWT , logoutUser);
 router.route('/refresh-token').post(refreshAccessToken);
 router.route('/change-password').post(verifyJWT , changeCurrentPassword);
 
+router.route('/current-user').get(verifyJWT , getCurrentUser);
+router.route('/update-account').patch(verifyJWT , updateAccountDetails);
+
+router.route('/update-avatar').patch(verifyJWT , upload.single("avatar") , updateUserAvatar);
+router.route('/update-cover-image').patch(verifyJWT , upload.single("coverImage") , updateUserCoverImage);
+
+router.route('/c/:username').get(getUserChannelProfile);
 export default router;

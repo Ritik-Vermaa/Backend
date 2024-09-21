@@ -38,8 +38,7 @@ const deleteFromCloudinary = async (publicId) => {
         if(response.result !== "ok"){
             throw new Error("Failed to delete image from Cloudinary");
         }
-        console.log("Old Avatar Deleted From Cloudinary" , publicId);
-        
+                
         return true;
         
     } catch (error) {

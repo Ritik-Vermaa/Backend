@@ -4,7 +4,6 @@ import { User } from '../models/user.model.js';
 import { uploadOnCloudinary , deleteFromCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import jwt from 'jsonwebtoken';
-import { is } from 'express/lib/request.js';
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -456,5 +455,39 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory.video",
+                foreignField: "_id",
+                as: "videos"
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                watchHistory: 1
+            }
+        }
+    ]);
+});
 
-export { registerUser, loginUser , logoutUser , refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage, getUserChannelProfile };
+export { registerUser, 
+    loginUser , 
+    logoutUser , 
+    refreshAccessToken, 
+    changeCurrentPassword, 
+    getCurrentUser, 
+    updateAccountDetails, 
+    updateUserAvatar, 
+    updateUserCoverImage, 
+    getUserChannelProfile,
+    getWatchHistory
+};
