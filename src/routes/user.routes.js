@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { registerUser } from '../controllers/user.controller.js';
 import {upload} from '../middlewares/malter.middlewares.js';
-import { loginUser ,logoutUser , refreshAccessToken , changeCurrentPassword , getCurrentUser , updateAccountDetails , updateUserAvatar , updateUserCoverImage , getUserChannelProfile} from '../controllers/user.controller.js';
+import { loginUser ,logoutUser , refreshAccessToken , changeCurrentPassword , getCurrentUser , updateAccountDetails , updateUserAvatar , updateUserCoverImage , getUserChannelProfile , getWatchHistory} from '../controllers/user.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router();
@@ -34,4 +34,5 @@ router.route('/update-avatar').patch(verifyJWT , upload.single("avatar") , updat
 router.route('/update-cover-image').patch(verifyJWT , upload.single("coverImage") , updateUserCoverImage);
 
 router.route('/c/:username').get(getUserChannelProfile);
+router.route('/watch-history').get(verifyJWT , getWatchHistory);
 export default router;

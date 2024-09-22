@@ -4,6 +4,7 @@ import { User } from '../models/user.model.js';
 import { uploadOnCloudinary , deleteFromCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -143,8 +144,8 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, 
         {
-         $set:{
-            refreshToken: undefined
+         $unset:{
+            refreshToken: 1
          }
         },
         {
@@ -459,7 +460,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(req.user._id)
+                _id: new mongoose.Types.ObjectId(req.user?._id)
             }
         },
         {
@@ -471,7 +472,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                 pipeline:[
                     {
                         $lookup: {
-                            form: "users",
+                            from: "users",
                             localField: "owner",
                             foreignField: "_id",
                             as: "owner",
